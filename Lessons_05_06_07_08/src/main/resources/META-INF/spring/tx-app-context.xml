@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<description>Spring Transaction Management.</description>
+
+	<context:component-scan base-package="com.mastspring.lesson06" />
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/test" />
+		<property name="username" value="root" /> <!-- you might need to given username here -->
+		<property name="password" value="Keerthi1" /> <!-- you might need to given password here -->
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:advice id="txadvice1234" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="printEmployee" read-only="true" /> <!--  print methods need to be read-only -->
+			<tx:method name="*" /> <!--  let rest uses tx read-write semantics -->
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:pointcut expression="execution (* com.mastspring.lesson06.EmployementService.*(..))" id="pcref" />
+		<aop:advisor advice-ref="txadvice1234" pointcut-ref="pcref" />
+	</aop:config>
+	
+	
+	<!--  All Good case, we got sugar, we got power -->
+	<bean id="sugar_yes_power_yes" class="com.mastspring.lesson06.CandyService">
+		<property name="sugarStorage" value="2000"> </property>
+		<property name="isPowerSupplerExists" value="true"> </property>
+	</bean>	
+	
+	<!--  Power Failure case, we got sugar, but no power -->
+	<bean id="sugar_yes_power_no" class="com.mastspring.lesson06.CandyService">
+		<property name="sugarStorage" value="2000"> </property>
+		<property name="isPowerSupplerExists" value="false"> </property>
+	</bean>	
+	
+	<!--  No sugar case:No sugar but we got power-->
+	<bean id="sugar_no_power_yes" class="com.mastspring.lesson06.CandyService">
+		<property name="sugarStorage" value="0"> </property>
+		<property name="isPowerSupplerExists" value="true"> </property>
+	</bean>	
+
+	<!--  Setting advices on transactional methods -->
+	<tx:annotation-driven transaction-manager="transactionManager" order="17"/>
+		
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+	
+	<bean id="dbactivity" class="com.mastspring.lesson06.DBActivity"></bean>
+	
+	<bean id="timecalc" class="com.mastspring.lesson06.TimeCalculator"/>
+		
+	<aop:config>
+		<aop:aspect id="someAspectToRunBeforeRuDBCommand" ref="timecalc">
+			<aop:pointcut expression="execution (* com.mastspring.lesson06.DBActivity.runDBCommand(..))" id="pc1"/>
+			<aop:before method="logCurrentTime" pointcut-ref="pc1" />
+			<aop:after method="sayThankyou" pointcut-ref="pc1" />
+		</aop:aspect>
+	</aop:config>
+	
+	
+	<!--  Programmatic TX Management -->
+	<bean id="pizzaservice1" class="com.mastspring.lesson06.PizzaServiceImpl">
+		<constructor-arg name="ptm" ref="transactionManager" ></constructor-arg>
+		<constructor-arg name="mainIngredient" value="Chicken Sizzler"></constructor-arg>
+	</bean>
+	
+	<bean id="pizzaservice2" class="com.mastspring.lesson06.PizzaServiceImpl">
+		<constructor-arg name="ptm" ref="transactionManager" ></constructor-arg>
+		<constructor-arg name="mainIngredient" value="Chocolate"></constructor-arg>
+	</bean>
+	
+	<!--  Programmatic TX Management : Using PTM-->
+	<bean id="icecreamservice1" class="com.mastspring.lesson06.IceCreamServiceImpl">
+		<constructor-arg name="ptm" ref="transactionManager" ></constructor-arg>
+		<constructor-arg name="mainIngredient" value="Cheese_and_Onion"></constructor-arg>
+	</bean>
+	
+	<bean id="icecreamservice2" class="com.mastspring.lesson06.IceCreamServiceImpl">
+		<constructor-arg name="ptm" ref="transactionManager" ></constructor-arg>
+		<constructor-arg name="mainIngredient" value="Almong_and_Hazelnet"></constructor-arg>
+	</bean>
+</beans>

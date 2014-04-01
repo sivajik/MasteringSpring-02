@@ -1,0 +1,4 @@
+Welcome to Java 7. Things around here are a little different than you may be used to. 
+This is a really good thing we have a lot to explore, now that the dust has settled and Java 7 has been 
+unleashed. By the time you finish this book, you will have taken your first steps into a larger world...
+This extract is copied from a book called "well grounded java developer" by two folks from london java club.

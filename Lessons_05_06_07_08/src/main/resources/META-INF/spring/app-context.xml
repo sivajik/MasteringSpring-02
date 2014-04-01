@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<description>Example configuration to get you started.</description>
+
+	<context:component-scan base-package="com.mastspring.lesson05" />
+	
+	<bean id="hsbcAspect" class="com.mastspring.lesson05.BankAccountAspectSchemaBased"></bean>
+	<!--  Check this:
+	Actual method throws NoBalanceExceptionSchemaBased so try adding it to below pointcut expression and
+	see what happens when you run the code.. Let me know if you noticed the problem (Quite Fun !)-->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.mastspring.lesson05.BankAccountServiceSchemaBased.withDraw(*))" id="myPointCut"/>
+	
+		<aop:aspect id="1" ref="hsbcAspect">
+			<aop:before method="logMessages" pointcut-ref="myPointCut"/>
+		</aop:aspect>
+		
+		<aop:aspect id="2" ref="hsbcAspect">
+			<aop:after method="thankyou" pointcut-ref="myPointCut"/>
+		</aop:aspect>
+		
+		<aop:aspect id="3" ref="hsbcAspect">
+			<aop:after-returning method="completedOk" pointcut-ref="myPointCut" returning="resultValue"/>
+		</aop:aspect>
+		
+		<aop:aspect id="4" ref="hsbcAspect">
+			<aop:after-throwing method="faiedOops" pointcut-ref="myPointCut" throwing="myException"/>
+		</aop:aspect>
+		
+		<aop:aspect id="5" ref="hsbcAspect">
+			<aop:around method="beforeAndAfterLogic" pointcut-ref="myPointCut"/>
+		</aop:aspect>		
+	</aop:config>
+</beans>
